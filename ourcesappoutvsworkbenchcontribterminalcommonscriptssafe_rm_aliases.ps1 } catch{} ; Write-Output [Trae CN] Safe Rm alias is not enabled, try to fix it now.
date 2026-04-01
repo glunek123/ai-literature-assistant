@@ -1,5 +1,0 @@
-[33m31cec15[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m Optimize dependencies with compatible versions for Streamlit Cloud
-[33m5de1408[m Remove tiktoken dependency to fix build issue on Streamlit Cloud
-[33mc4a5475[m Fix dependencies and remove version constraints for better compatibility
-[33mff88f51[m Update dependencies and config for Streamlit Cloud deployment
-[33mcaee0e9[m Initial commit: AI文献助手
