@@ -19,8 +19,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 复制应用代码
 COPY . .
 
+# 创建数据持久化目录
+RUN mkdir -p /data/chroma_db
+
 # 暴露端口
 EXPOSE 8501
+
+# 设置环境变量
+ENV STREAMLIT_SERVER_PORT=8501
+ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
+ENV CHROMA_PERSIST_DIR=/data/chroma_db
 
 # 启动应用
 CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]

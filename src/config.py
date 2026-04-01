@@ -1,6 +1,6 @@
 """
 配置文件模块
-存储API密钥和基础配置信息
+存储 API 密钥和基础配置信息
 """
 
 import os
@@ -12,12 +12,12 @@ class Config:
     配置类，存储所有配置信息
     
     Attributes:
-        DASHSCOPE_API_KEY: 阿里云DashScope API密钥
-        DASHSCOPE_BASE_URL: DashScope API基础URL
-        EMBEDDING_MODEL: Embedding模型名称
+        DASHSCOPE_API_KEY: 阿里云 DashScope API 密钥
+        DASHSCOPE_BASE_URL: DashScope API 基础 URL
+        EMBEDDING_MODEL: Embedding 模型名称
         CHAT_MODEL: 聊天模型名称
-        CHROMA_PERSIST_DIR: ChromaDB持久化目录
-        EXCEL_FILE_PATH: Excel数据文件路径
+        CHROMA_PERSIST_DIR: ChromaDB 持久化目录
+        EXCEL_FILE_PATH: Excel 数据文件路径
         TOP_K: 检索返回的文献数量
     """
     
@@ -27,8 +27,15 @@ class Config:
     EMBEDDING_MODEL: str = "text-embedding-v3"
     CHAT_MODEL: str = "qwen-plus"
     
-    CHROMA_PERSIST_DIR: str = "./chroma_db"
-    EXCEL_FILE_PATH: str = "./data/CNKI_1_1.xlsx"
+    # 智能检测运行环境，设置正确的路径
+    if os.getenv("RAILWAY"):
+        # Railway 环境
+        CHROMA_PERSIST_DIR: str = "/data/chroma_db"
+        EXCEL_FILE_PATH: str = "/app/data/CNKI_1_1.xlsx"
+    else:
+        # 本地环境
+        CHROMA_PERSIST_DIR: str = os.getenv("CHROMA_PERSIST_DIR", "./chroma_db")
+        EXCEL_FILE_PATH: str = os.getenv("EXCEL_FILE_PATH", "./data/CNKI_1_1.xlsx")
     
     TOP_K: int = 3
     
@@ -43,8 +50,8 @@ class Config:
 任务：根据用户输入的主题，从提供的文献中总结核心观点。
 
 要求：
-1. 每篇文献总结3个核心观点
-2. 观点要准确、简洁（≤100字）
+1. 每篇文献总结 3 个核心观点
+2. 观点要准确、简洁（≤100 字）
 3. 使用学术但易懂的语言
 4. 按重要性排序
 5. 必须基于提供的文献内容，不得编造或夸大
@@ -70,10 +77,10 @@ class Config:
     @classmethod
     def get_dashscope_config(cls) -> Dict[str, str]:
         """
-        获取DashScope配置
+        获取 DashScope 配置
         
         Returns:
-            包含API密钥和基础URL的字典
+            包含 API 密钥和基础 URL 的字典
         """
         return {
             "api_key": cls.DASHSCOPE_API_KEY,
@@ -86,3 +93,4 @@ class Config:
         确保必要的目录存在
         """
         os.makedirs(cls.CHROMA_PERSIST_DIR, exist_ok=True)
+        os.makedirs(os.path.dirname(cls.EXCEL_FILE_PATH), exist_ok=True)
