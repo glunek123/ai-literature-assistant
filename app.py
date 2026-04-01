@@ -1,6 +1,6 @@
 """
-AI文献助手 - Streamlit Web应用
-基于RAG和大语言模型的文献检索与总结系统
+AI 文献助手 - Streamlit Web 应用
+基于 RAG 和大语言模型的文献检索与总结系统
 """
 
 import streamlit as st
@@ -19,7 +19,7 @@ from langchain_core.documents import Document
 
 def init_session_state():
     """
-    初始化Session State
+    初始化 Session State
     """
     if 'knowledge_base_built' not in st.session_state:
         st.session_state.knowledge_base_built = False
@@ -140,8 +140,10 @@ def display_results(result: Dict[str, Any]):
                         if keyword.strip():
                             st.markdown(f"- {keyword.strip()}")
             
-            with st.expander("查看摘要", expanded=False):
-                st.markdown(doc.page_content)
+            # 修复：移除嵌套 expander，改用 collapsible 区域
+            st.markdown('**摘要**：')
+            with st.container():
+                st.markdown(f'<div style="background-color: #f0f2f6; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0;">{doc.page_content}</div>', unsafe_allow_html=True)
 
 
 def main():
@@ -149,7 +151,7 @@ def main():
     主函数
     """
     st.set_page_config(
-        page_title='AI文献助手',
+        page_title='AI 文献助手',
         page_icon='📚',
         layout='wide',
         initial_sidebar_state='expanded',
@@ -180,8 +182,8 @@ def main():
     
     init_session_state()
     
-    st.markdown('<h1 class="main-header">📚 AI文献助手</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; color: #666;">基于RAG和大语言模型的智能文献检索与总结系统</p>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">📚 AI 文献助手</h1>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #666;">基于 RAG 和大语言模型的智能文献检索与总结系统</p>', unsafe_allow_html=True)
     
     with st.sidebar:
         st.markdown('## ⚙️ 系统设置')
@@ -203,10 +205,10 @@ def main():
         
         st.markdown('### ℹ️ 系统信息')
         st.markdown(f"""
-        - **Embedding模型**：{Config.EMBEDDING_MODEL}
+        - **Embedding 模型**：{Config.EMBEDDING_MODEL}
         - **大语言模型**：{Config.CHAT_MODEL}
         - **检索数量**：Top {Config.TOP_K}
-        - **数据来源**：CNKI文献库
+        - **数据来源**：CNKI 文献库
         """)
         
         st.markdown('---')
@@ -222,13 +224,13 @@ def main():
     if not st.session_state.knowledge_base_built:
         if not load_knowledge_base():
             st.markdown('<div class="info-box">', unsafe_allow_html=True)
-            st.markdown('### 👋 欢迎使用AI文献助手！')
+            st.markdown('### 👋 欢迎使用 AI 文献助手！')
             st.markdown("""
             本系统可以帮助您快速了解研究领域的核心观点。
             
             **使用步骤**：
             1. 在左侧边栏点击"构建知识库"按钮
-            2. 等待知识库构建完成（约需1-2分钟）
+            2. 等待知识库构建完成（约需 1-2 分钟）
             3. 在下方输入框中输入您感兴趣的研究主题
             4. 系统将自动检索相关文献并总结核心观点
             
