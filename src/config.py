@@ -21,14 +21,14 @@ class Config:
         TOP_K: 检索返回的文献数量
     """
     
-    DASHSCOPE_API_KEY: str = "sk-2033afec579e49998b4289759508b739"
+    DASHSCOPE_API_KEY: str = os.getenv("DASHSCOPE_API_KEY", "sk-2033afec579e49998b4289759508b739")
     DASHSCOPE_BASE_URL: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
     
     EMBEDDING_MODEL: str = "text-embedding-v3"
     CHAT_MODEL: str = "qwen-plus"
     
     CHROMA_PERSIST_DIR: str = "./chroma_db"
-    EXCEL_FILE_PATH: str = r"D:\Program Files\trae_project\demo\data\CNKI_1_1.xlsx"
+    EXCEL_FILE_PATH: str = "./data/CNKI_1_1.xlsx"
     
     TOP_K: int = 3
     
