@@ -1,6 +1,6 @@
 """
 知识库构建模块
-负责从Excel数据构建向量知识库
+负责从 Excel 数据构建向量知识库
 """
 
 import pandas as pd
@@ -23,17 +23,17 @@ class KnowledgeBase:
     """
     知识库构建类
     
-    负责从Excel数据构建向量知识库，包括：
-    - 读取Excel数据
+    负责从 Excel 数据构建向量知识库，包括：
+    - 读取 Excel 数据
     - 数据预处理
     - 文档分割
     - 向量化
     - 存储
     
     Attributes:
-        excel_path: Excel文件路径
-        persist_directory: ChromaDB持久化目录
-        embeddings: Embedding模型
+        excel_path: Excel 文件路径
+        persist_directory: ChromaDB 持久化目录
+        embeddings: Embedding 模型
         vectorstore: 向量存储
     """
     
@@ -46,8 +46,8 @@ class KnowledgeBase:
         初始化知识库
         
         Args:
-            excel_path: Excel文件路径，默认使用Config中的配置
-            persist_directory: ChromaDB持久化目录，默认使用Config中的配置
+            excel_path: Excel 文件路径，默认使用 Config 中的配置
+            persist_directory: ChromaDB 持久化目录，默认使用 Config 中的配置
         """
         self.excel_path = excel_path or Config.EXCEL_FILE_PATH
         self.persist_directory = persist_directory or Config.CHROMA_PERSIST_DIR
@@ -63,34 +63,34 @@ class KnowledgeBase:
     
     def load_excel_data(self) -> pd.DataFrame:
         """
-        从Excel文件加载数据
+        从 Excel 文件加载数据
         
         Returns:
-            包含论文数据的DataFrame
+            包含论文数据的 DataFrame
             
         Raises:
             ValueError: 如果数据验证失败
         """
-        print(f"正在加载Excel文件：{self.excel_path}")
+        print(f"正在加载 Excel 文件：{self.excel_path}")
         
         df = pd.read_excel(self.excel_path, sheet_name='CNKI_1')
         
         print(f"成功加载 {len(df)} 条数据")
         
         if not validate_excel_data(df):
-            raise ValueError("Excel数据验证失败")
+            raise ValueError("Excel 数据验证失败")
         
         return df
     
     def create_documents(self, df: pd.DataFrame) -> List[Document]:
         """
-        从DataFrame创建LangChain Document对象
+        从 DataFrame 创建 LangChain Document 对象
         
         Args:
-            df: 包含论文数据的DataFrame
+            df: 包含论文数据的 DataFrame
             
         Returns:
-            Document对象列表
+            Document 对象列表
         """
         print("正在创建文档对象...")
         
@@ -139,24 +139,45 @@ class KnowledgeBase:
     
     def build_vectorstore(self, documents: List[Document]) -> Chroma:
         """
-        构建向量存储
+        构建向量存储（分批处理，避免超过 API 限制）
         
         Args:
             documents: 文档列表
             
         Returns:
-            Chroma向量存储对象
+            Chroma 向量存储对象
         """
         print("正在构建向量存储...")
-        print(f"使用Embedding模型：{Config.EMBEDDING_MODEL}")
+        print(f"使用 Embedding 模型：{Config.EMBEDDING_MODEL}")
         
+        # 分批处理，每批最多 10 个文档（DashScope API 限制）
+        batch_size = 10
+        total_docs = len(documents)
+        
+        print(f"开始分批处理 {total_docs} 个文档，每批 {batch_size} 个")
+        
+        # 先处理第一批文档
+        first_batch = documents[:batch_size]
         self.vectorstore = Chroma.from_documents(
-            documents=documents,
+            documents=first_batch,
             embedding=self.embeddings,
             persist_directory=self.persist_directory,
         )
         
+        print(f"✓ 第 1 批处理完成（{len(first_batch)} 个文档）")
+        
+        # 处理剩余批次
+        for i in range(batch_size, total_docs, batch_size):
+            batch_num = (i // batch_size) + 1
+            batch_docs = documents[i:i + batch_size]
+            
+            # 添加到现有的 vectorstore
+            self.vectorstore.add_documents(batch_docs)
+            
+            print(f"✓ 第 {batch_num} 批处理完成（{len(batch_docs)} 个文档）")
+        
         print(f"向量存储构建完成，持久化到：{self.persist_directory}")
+        print(f"总共处理 {total_docs} 个文档")
         
         return self.vectorstore
     
@@ -165,13 +186,13 @@ class KnowledgeBase:
         构建完整的知识库
         
         这是主入口方法，执行完整的知识库构建流程：
-        1. 加载Excel数据
+        1. 加载 Excel 数据
         2. 创建文档对象
         3. 分割文档
         4. 构建向量存储
         
         Returns:
-            构建完成的Chroma向量存储对象
+            构建完成的 Chroma 向量存储对象
         """
         print("=" * 50)
         print("开始构建知识库")
@@ -196,7 +217,7 @@ class KnowledgeBase:
         加载已有的向量存储
         
         Returns:
-            Chroma向量存储对象
+            Chroma 向量存储对象
             
         Raises:
             ValueError: 如果向量存储不存在
@@ -224,7 +245,7 @@ def build_knowledge_base():
     构建知识库的便捷函数
     
     Returns:
-        Chroma向量存储对象
+        Chroma 向量存储对象
     """
     kb = KnowledgeBase()
     return kb.build_knowledge_base()
